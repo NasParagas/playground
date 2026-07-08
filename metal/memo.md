@@ -49,7 +49,7 @@ xcrun -sdk macosx metal --version
 Apple metal version 32023.918 (metalfe-32023.918.1)
 Target: air64-apple-darwin27.0.0
 Thread model: posix
-InstalledDir: /private/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.5218.8.xH7d5X/Metal.xctoolchain/usr/metal/current/bin
+InstalledDir: <install-dir>
 ```
 
 ok
