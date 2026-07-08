@@ -1,0 +1,56 @@
+sdk_root := `xcrun --sdk macosx --show-sdk-path`
+metal_cpp := justfile_directory() + "/metal-cpp"
+cxxflags := "-std=c++17 -Wall -Wextra -isysroot " + sdk_root + " -I" + metal_cpp
+frameworks := "-framework Metal -framework Foundation -framework QuartzCore"
+
+default:
+    @just --list
+
+# 01: デバイス情報を表示するだけの最小サンプル
+build-device-info:
+    mkdir -p claude-sample/01_device_info/build
+    clang++ {{cxxflags}} {{frameworks}} claude-sample/01_device_info/main.cpp -o claude-sample/01_device_info/build/device_info
+
+run-device-info: build-device-info
+    ./claude-sample/01_device_info/build/device_info
+
+# 02: computeカーネルで配列加算(GPGPU)
+build-compute:
+    mkdir -p claude-sample/02_compute_add/build
+    xcrun -sdk macosx metal -c claude-sample/02_compute_add/add.metal -o claude-sample/02_compute_add/build/add.air
+    xcrun -sdk macosx metallib claude-sample/02_compute_add/build/add.air -o claude-sample/02_compute_add/add.metallib
+    clang++ {{cxxflags}} {{frameworks}} claude-sample/02_compute_add/main.cpp -o claude-sample/02_compute_add/build/compute_add
+
+run-compute: build-compute
+    cd claude-sample/02_compute_add && ./build/compute_add
+
+# 03: 三角形をオフスクリーンテクスチャに描画してPPMに書き出す
+build-offscreen:
+    mkdir -p claude-sample/03_offscreen_triangle/build
+    xcrun -sdk macosx metal -c claude-sample/03_offscreen_triangle/triangle.metal -o claude-sample/03_offscreen_triangle/build/triangle.air
+    xcrun -sdk macosx metallib claude-sample/03_offscreen_triangle/build/triangle.air -o claude-sample/03_offscreen_triangle/triangle.metallib
+    clang++ {{cxxflags}} {{frameworks}} claude-sample/03_offscreen_triangle/main.cpp -o claude-sample/03_offscreen_triangle/build/offscreen_triangle
+
+run-offscreen: build-offscreen
+    cd claude-sample/03_offscreen_triangle && ./build/offscreen_triangle
+
+# 04: AppKitでウィンドウを開いて三角形を描画する(Objective-C++)
+# 本物のCocoaヘッダーとmetal-cppヘッダーはNS定数の型が衝突するため翻訳単位を分ける:
+#   main.mm(Cocoa専用) / Renderer.cpp(metal-cpp専用) を別々にコンパイルしてリンクする
+build-window:
+    mkdir -p claude-sample/04_window_triangle/build
+    xcrun -sdk macosx metal -c claude-sample/04_window_triangle/triangle.metal -o claude-sample/04_window_triangle/build/triangle.air
+    xcrun -sdk macosx metallib claude-sample/04_window_triangle/build/triangle.air -o claude-sample/04_window_triangle/triangle.metallib
+    clang++ {{cxxflags}} -c claude-sample/04_window_triangle/Renderer.cpp -o claude-sample/04_window_triangle/build/Renderer.o
+    clang++ {{cxxflags}} -fobjc-arc -c claude-sample/04_window_triangle/main.mm -o claude-sample/04_window_triangle/build/main.o
+    clang++ {{cxxflags}} {{frameworks}} -framework Cocoa claude-sample/04_window_triangle/build/Renderer.o claude-sample/04_window_triangle/build/main.o -o claude-sample/04_window_triangle/build/window_triangle
+
+run-window: build-window
+    cd claude-sample/04_window_triangle && ./build/window_triangle
+
+# claude-sample配下の全サンプルをビルド
+build-all: build-device-info build-compute build-offscreen build-window
+
+# ビルド成果物・metallib・出力画像を消す
+clean:
+    rm -rf claude-sample/*/build claude-sample/*/*.metallib claude-sample/*/*.ppm

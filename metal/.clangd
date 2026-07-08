@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - -std=c++17
+    - -I/Users/niiyama/ws/playground/metal/metal-cpp
+    - -isysroot
+    - /Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk
