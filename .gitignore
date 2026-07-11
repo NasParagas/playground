@@ -4,3 +4,8 @@
 **/bin
 **/obj
 *.lock
+# ignore gradle project-specific cache directory
+**/.gradle
+
+# ignore kotlin plugin data
+**/.kotlin
