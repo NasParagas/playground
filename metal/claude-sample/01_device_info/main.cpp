@@ -5,9 +5,8 @@
 #define NS_PRIVATE_IMPLEMENTATION
 #define MTL_PRIVATE_IMPLEMENTATION
 
-#include <cstdio>
-
 #include <Metal/Metal.hpp>
+#include <cstdio>
 
 namespace {
 
@@ -16,7 +15,7 @@ struct FamilyCheck {
     const char* label;
 };
 
-} // namespace
+}  // namespace
 
 int main() {
     MTL::Device* pDevice = MTL::CreateSystemDefaultDevice();
@@ -25,12 +24,14 @@ int main() {
         return 1;
     }
 
+    // clang-format off
     printf("device name                 : %s\n", pDevice->name()->utf8String());
     printf("registryID                  : %llu\n", (unsigned long long)pDevice->registryID());
     printf("low power                   : %s\n", pDevice->isLowPower() ? "yes" : "no");
     printf("removable                   : %s\n", pDevice->isRemovable() ? "yes" : "no");
     printf("unified memory              : %s\n", pDevice->hasUnifiedMemory() ? "yes" : "no");
     printf("max buffer length           : %.2f MiB\n", pDevice->maxBufferLength() / (1024.0 * 1024.0));
+    // clang-format on
 
     MTL::Size maxThreads = pDevice->maxThreadsPerThreadgroup();
     printf("max threads per threadgroup : %llu x %llu x %llu\n",
@@ -40,6 +41,7 @@ int main() {
     printf("recommended max working set : %.2f MiB\n",
            pDevice->recommendedMaxWorkingSetSize() / (1024.0 * 1024.0));
 
+    // clang-format off
     const FamilyCheck families[] = {
         {MTL::GPUFamilyApple7, "Apple7"},
         {MTL::GPUFamilyApple8, "Apple8"},
@@ -48,10 +50,13 @@ int main() {
         {MTL::GPUFamilyMac2, "Mac2"},
         {MTL::GPUFamilyMetal3, "Metal3"},
     };
+    // clang-format on
 
     printf("--- GPU family support ---\n");
     for (const auto& f : families) {
-        printf("  %-8s: %s\n", f.label, pDevice->supportsFamily(f.family) ? "yes" : "no");
+        printf("  %-8s: %s\n",
+               f.label,
+               pDevice->supportsFamily(f.family) ? "yes" : "no");
     }
 
     pDevice->release();

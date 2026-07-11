@@ -1,49 +1,60 @@
 // GPGPUの最小サンプル: 2つのfloat配列を足し算するcomputeカーネル(add.metal)を
 // デバイス・コマンドキュー・バッファを用意してディスパッチし、結果をCPU側で検証する。
 //
-// add.metalは事前に `xcrun -sdk macosx metal` でadd.metallibにコンパイルしておく必要がある
+// add.metalは事前に `xcrun -sdk macosx metal`
+// でadd.metallibにコンパイルしておく必要がある
 // (justfileのレシピを参照)。実行時にこのmain.cppと同じディレクトリのadd.metallibを読み込む。
 
 #define NS_PRIVATE_IMPLEMENTATION
 #define MTL_PRIVATE_IMPLEMENTATION
 
+#include <Metal/Metal.hpp>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
-#include <Metal/Metal.hpp>
-
 namespace {
 
-constexpr size_t kArrayLength = 1 << 20; // 約100万要素
+constexpr size_t kArrayLength = 1 << 20;  // 約100万要素
 
 MTL::Buffer* newBufferFilledWithRandom(MTL::Device* pDevice) {
-    MTL::Buffer* pBuffer = pDevice->newBuffer(kArrayLength * sizeof(float), MTL::ResourceStorageModeShared);
+    MTL::Buffer* pBuffer = pDevice->newBuffer(kArrayLength * sizeof(float),
+                                              MTL::ResourceStorageModeShared);
     float* pContents = static_cast<float*>(pBuffer->contents());
     for (size_t i = 0; i < kArrayLength; ++i) {
-        pContents[i] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        pContents[i] =
+            static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     }
     return pBuffer;
 }
 
-} // namespace
+}  // namespace
 
 int main() {
     MTL::Device* pDevice = MTL::CreateSystemDefaultDevice();
 
     NS::Error* pError = nullptr;
-    NS::String* pLibraryPath = NS::String::string("./add.metallib", NS::UTF8StringEncoding);
-    MTL::Library* pLibrary = pDevice->newLibrary(NS::URL::fileURLWithPath(pLibraryPath), &pError);
+    NS::String* pLibraryPath =
+        NS::String::string("./add.metallib", NS::UTF8StringEncoding);
+    MTL::Library* pLibrary =
+        pDevice->newLibrary(NS::URL::fileURLWithPath(pLibraryPath), &pError);
     if (pLibrary == nullptr) {
-        fprintf(stderr, "add.metallibの読み込みに失敗しました: %s\n", pError->localizedDescription()->utf8String());
-        fprintf(stderr, "先に `just build-compute` でmetallibを生成してください\n");
+        fprintf(stderr,
+                "add.metallibの読み込みに失敗しました: %s\n",
+                pError->localizedDescription()->utf8String());
+        fprintf(stderr,
+                "先に `just build-compute` でmetallibを生成してください\n");
         return 1;
     }
 
-    MTL::Function* pAddFunction = pLibrary->newFunction(NS::String::string("add_arrays", NS::UTF8StringEncoding));
-    MTL::ComputePipelineState* pPSO = pDevice->newComputePipelineState(pAddFunction, &pError);
+    MTL::Function* pAddFunction = pLibrary->newFunction(
+        NS::String::string("add_arrays", NS::UTF8StringEncoding));
+    MTL::ComputePipelineState* pPSO =
+        pDevice->newComputePipelineState(pAddFunction, &pError);
     if (pPSO == nullptr) {
-        fprintf(stderr, "パイプライン作成に失敗しました: %s\n", pError->localizedDescription()->utf8String());
+        fprintf(stderr,
+                "パイプライン作成に失敗しました: %s\n",
+                pError->localizedDescription()->utf8String());
         return 1;
     }
 
@@ -51,7 +62,8 @@ int main() {
 
     MTL::Buffer* pBufferA = newBufferFilledWithRandom(pDevice);
     MTL::Buffer* pBufferB = newBufferFilledWithRandom(pDevice);
-    MTL::Buffer* pBufferResult = pDevice->newBuffer(kArrayLength * sizeof(float), MTL::ResourceStorageModeShared);
+    MTL::Buffer* pBufferResult = pDevice->newBuffer(
+        kArrayLength * sizeof(float), MTL::ResourceStorageModeShared);
 
     MTL::CommandBuffer* pCmd = pQueue->commandBuffer();
     MTL::ComputeCommandEncoder* pEnc = pCmd->computeCommandEncoder();
@@ -65,7 +77,8 @@ int main() {
     if (threadGroupSize > kArrayLength) {
         threadGroupSize = kArrayLength;
     }
-    pEnc->dispatchThreads(MTL::Size(kArrayLength, 1, 1), MTL::Size(threadGroupSize, 1, 1));
+    pEnc->dispatchThreads(MTL::Size(kArrayLength, 1, 1),
+                          MTL::Size(threadGroupSize, 1, 1));
     pEnc->endEncoding();
 
     pCmd->commit();
@@ -79,7 +92,11 @@ int main() {
     for (size_t i = 0; i < kArrayLength; ++i) {
         float expected = a[i] + b[i];
         if (std::fabs(expected - result[i]) > 1e-5f) {
-            fprintf(stderr, "不一致 at %zu: got %f, expected %f\n", i, result[i], expected);
+            fprintf(stderr,
+                    "不一致 at %zu: got %f, expected %f\n",
+                    i,
+                    result[i],
+                    expected);
             ok = false;
             break;
         }

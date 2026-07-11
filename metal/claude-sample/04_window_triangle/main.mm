@@ -16,7 +16,7 @@
 namespace {
 constexpr CGFloat kWindowWidth = 800;
 constexpr CGFloat kWindowHeight = 600;
-} // namespace
+}  // namespace
 
 @interface MetalView : NSView
 @end
@@ -57,10 +57,10 @@ constexpr CGFloat kWindowHeight = 600;
 
         // CVDisplayLinkの代わりに、シンプルさ優先で約60fpsのNSTimerで再描画する
         _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 / 60.0
-                                                   target:self
-                                                 selector:@selector(render)
-                                                 userInfo:nil
-                                                  repeats:YES];
+                                                  target:self
+                                                selector:@selector(render)
+                                                userInfo:nil
+                                                 repeats:YES];
         // [debug] NSLog(@"MetalView initWithFrame完了");
     }
     return self;
@@ -110,11 +110,12 @@ constexpr CGFloat kWindowHeight = 600;
     // [debug] NSLog(@"applicationDidFinishLaunching開始");
 
     NSRect frame = NSMakeRect(0, 0, kWindowWidth, kWindowHeight);
-    _window = [[NSWindow alloc]
-            initWithContentRect:frame
-                      styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable)
-                        backing:NSBackingStoreBuffered
-                          defer:NO];
+    _window =
+        [[NSWindow alloc] initWithContentRect:frame
+                                    styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
+                                               NSWindowStyleMaskResizable)
+                                      backing:NSBackingStoreBuffered
+                                        defer:NO];
     _window.releasedWhenClosed = NO;
     [_window setTitle:@"metal-cpp: window triangle"];
     [_window center];
@@ -126,10 +127,12 @@ constexpr CGFloat kWindowHeight = 600;
     [_window makeKeyAndOrderFront:nil];
     [_window orderFrontRegardless];
     [NSApp activateIgnoringOtherApps:YES];
-    [[NSRunningApplication currentApplication] activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+    [[NSRunningApplication currentApplication]
+        activateWithOptions:NSApplicationActivateIgnoringOtherApps];
 
     // [debug] NSLog(@"window作成完了: frame=%@ isVisible=%d isKeyWindow=%d isMiniaturized=%d",
-    // [debug]       NSStringFromRect(_window.frame), _window.isVisible, _window.isKeyWindow, _window.isMiniaturized);
+    // [debug]       NSStringFromRect(_window.frame), _window.isVisible, _window.isKeyWindow,
+    // _window.isMiniaturized);
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)sender {
