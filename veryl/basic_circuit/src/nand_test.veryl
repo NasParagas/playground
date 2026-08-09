@@ -1,0 +1,35 @@
+/// Nand のテストベンチ
+/// `veryl test --sim verilator` で実行する
+#[test(test_nand)]
+embed (inline) sv{{{
+module test_nand;
+    logic a;
+    logic b;
+    logic y;
+
+    basic_circuit_Nand u_nand (
+        .a (a),
+        .b (b),
+        .y (y)
+    );
+
+    task automatic check(input logic ia, input logic ib, input logic expected);
+        a = ia;
+        b = ib;
+        #1;
+        if (y !== expected) begin
+            $error("nand(%0b, %0b) = %0b, expected %0b", ia, ib, y, expected);
+        end else begin
+            $display("nand(%0b, %0b) = %0b OK", ia, ib, y);
+        end
+    endtask
+
+    initial begin
+        check(1'b0, 1'b0, 1'b1);
+        check(1'b0, 1'b1, 1'b1);
+        check(1'b1, 1'b0, 1'b1);
+        check(1'b1, 1'b1, 1'b0);
+        $finish;
+    end
+endmodule
+}}}

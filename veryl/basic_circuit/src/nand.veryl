@@ -1,0 +1,32 @@
+/// 2入力 NAND ゲート
+///
+/// y = ~(a & b)
+///
+module Nand (
+    a: input  logic,
+    b: input  logic,
+    y: output logic,
+) {
+    assign y = ~(a & b);
+}
+
+/// NAND だけで AND を組んだ例（NAND の出力をもう一度 NAND で反転する）
+module AndFromNand (
+    a: input  logic,
+    b: input  logic,
+    y: output logic,
+) {
+    var nand_out: logic;
+
+    inst u_nand0: Nand (
+        a          ,
+        b          ,
+        y: nand_out,
+    );
+
+    inst u_nand1: Nand (
+        a: nand_out,
+        b: nand_out,
+        y          ,
+    );
+}
