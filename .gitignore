@@ -9,3 +9,8 @@
 
 # ignore kotlin plugin data
 **/.kotlin
+
+
+# Added by cargo
+
+/target

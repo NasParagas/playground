@@ -1,0 +1,21 @@
+# Apple Music -> Discord Rich Presence
+
+# レシピ一覧を表示
+default:
+    @just --list
+
+# デバッグビルド
+build:
+    cargo build
+
+# 実行 (Ctrl-C で終了。Discord デスクトップアプリ起動中に)
+run:
+    cargo run
+
+# リリースビルドで実行
+run-release:
+    cargo run --release
+
+# now_playing.js 単体の動作確認
+now-playing:
+    osascript -l JavaScript now_playing.js

@@ -1,0 +1,13 @@
+module GetOpType (
+    opecode: input logic<7>,
+    bit32_r: output logic,
+    bit32_i: output logic,
+    bit32_s: output logic,
+    bit32_b: output logic,
+    bit32_u: output logic,
+    bit48: output logic,
+    bit64: output logic,
+    bit80_more: output logic
+) {
+    assign bit
+}
